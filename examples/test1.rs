@@ -9,11 +9,11 @@ use std::env::current_dir;
 use rust_dir_nav::*;
 
 struct Appl;
-impl Event for Appl {
-    fn do_dir(&self, d:&String) {
+impl DirEvent for Appl {
+    fn do_dir(&mut self, d:&String) {
         print!("\n  {:?}", d);
     }
-    fn do_file(&self, f:&String) {
+    fn do_file(&mut self, f:&String) {
         print!("\n    {:?}", f);
     }
 }
@@ -38,12 +38,16 @@ fn main() -> io::Result<()> {
 
     let path = current_dir()?;
     // path.pop();
+    print!("\n  Searching path {:?}\n", &path);
     let _rslt = dn.visit(&path);
+    print!("\n\n  processed {} files and {} dirs", dn.get_funs(), dn.get_dirs());
     print!("\n");
 
     dn.clear_pat();
     dn.add_pat("rs").add_pat("toml").add_pat("exe");
+    print!("\n  Searching path {:?}\n", &path);
     let rslt = dn.visit(&path);
+    print!("\n\n  processed {} files and {} dirs", dn.get_funs(), dn.get_dirs());
     print!("\n\n");
     rslt
 }
