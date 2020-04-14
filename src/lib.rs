@@ -35,6 +35,7 @@ type Patterns = Vec::<std::ffi::OsString>;
 
 /// Directory Navigator Structure
 #[allow(dead_code)]
+#[derive(Debug)]
 pub struct DirNav<App:DirEvent> { 
     /// file exts to look for
     pats:Patterns,
