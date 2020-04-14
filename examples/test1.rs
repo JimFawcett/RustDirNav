@@ -10,10 +10,10 @@ use rust_dir_nav::*;
 
 struct Appl;
 impl DirEvent for Appl {
-    fn do_dir(&mut self, d:&String) {
+    fn do_dir(&mut self, d:&str) {
         print!("\n  {:?}", d);
     }
-    fn do_file(&mut self, f:&String) {
+    fn do_file(&mut self, f:&str) {
         print!("\n    {:?}", f);
     }
 }

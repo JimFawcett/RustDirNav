@@ -15,8 +15,8 @@ use std::path::{Path, PathBuf};
 
 /// trait required of the App generic parameter type
 pub trait DirEvent {
-  fn do_dir(&mut self, d:&String);
-  fn do_file(&mut self, f:&String);
+  fn do_dir(&mut self, d:&str);
+  fn do_file(&mut self, f:&str);
 }
 //---------------------------------------
 // Sample implementation of DirNav param
@@ -113,9 +113,9 @@ impl<App:DirEvent> DirNav<App> {
         let ext = p.extension();
         match ext {
             Some(extn) => {
-                return self.pats.contains(&(extn.to_os_string()));
+                self.pats.contains(&(extn.to_os_string()))
             }
-            None => return false,
+            None => false
         }
     }        
 }
@@ -146,12 +146,12 @@ mod tests {
             rslt_store: Vec<String>,
         }
         impl DirEvent for ApplTest {
-            fn do_dir(&mut self, _d:&String) {
+            fn do_dir(&mut self, _d:&str) {
                 //print!("\n  {:?}", d);
             }
-            fn do_file(&mut self, f:&String) {
+            fn do_file(&mut self, f:&str) {
                 //print!("\n    {:?}", f);
-                self.rslt_store.push((*f).clone());
+                self.rslt_store.push((*f).to_string());
             }
         }
         let a = ApplTest { rslt_store: Vec::<String>::new(), };
