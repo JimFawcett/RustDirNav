@@ -8,19 +8,20 @@
    parameter App to define how files and directories are
    handled.
 */
-use std::io;
 use std::fs::{self, DirEntry};
+use std::io;
 #[allow(unused_imports)]
 use std::path::{Path, PathBuf};
 
 /// trait required of the App generic parameter type
 pub trait DirEvent {
-  fn do_dir(&mut self, d:&str);
-  fn do_file(&mut self, f:&str);
+    fn do_dir(&mut self, d: &str);
+    fn do_file(&mut self, f: &str);
 }
 //---------------------------------------
 // Sample implementation of DirNav param
-// -------------------------------------- 
+// --------------------------------------
+// #[derive(Debug, Default)]
 // struct Appl;
 // impl DirEvent for Appl {
 //     fn do_dir(&mut self, d:&String) {
@@ -28,64 +29,75 @@ pub trait DirEvent {
 //     }
 //     fn do_file(&mut self, f:&String) {
 //         print!("\n    {:?}", f);
-//     }    
+//     }
 // }
 
-type Patterns = Vec::<std::ffi::OsString>;
+type Patterns = Vec<std::ffi::OsString>;
 
 /// Directory Navigator Structure
 #[allow(dead_code)]
-#[derive(Debug)]
-pub struct DirNav<App:DirEvent> { 
-    /// file exts to look for
-    pats:Patterns,
-    /// instance of App : DirEvent
-    app:App,
+#[derive(Debug, Default)]
+pub struct DirNav<App: DirEvent> {
+    /// file extensions to look for
+    pats: Patterns,
+    /// instance of App : DirEvent, requires do_file and do_dir methods
+    app: App,
     /// number of files processed
-    num_fun : usize,
+    num_fun: usize,
     /// number of dirs processed
-    num_dir : usize,
+    num_dir: usize,
 }
-impl<App:DirEvent + Default> DirNav<App> {
-    pub fn new() -> Self where App:DirEvent + Default {
+impl<App: DirEvent + Default> DirNav<App> {
+    pub fn new() -> Self
+    where
+        App: DirEvent + Default,
+    {
         Self {
-            pats : Patterns::new(),
-            app:App::default(),
+            pats: Patterns::new(),
+            app: App::default(),
             num_fun: 0,
             num_dir: 0,
         }
     }
-    /// return reference to App to get results
-    pub fn get_app(&mut self) -> &App { &self.app }
+    /// return reference to App to get results, if any
+    pub fn get_app(&mut self) -> &App {
+        &self.app
+    }
     /// return number of dirs processed
-    pub fn get_dirs(&self) -> usize { self.num_dir }
+    pub fn get_dirs(&self) -> usize {
+        self.num_dir
+    }
     /// return number of files processed
-    pub fn get_funs(&self) -> usize { self.num_fun }
-    /// return patterns
+    pub fn get_funs(&self) -> usize {
+        self.num_fun
+    }
+    /// return patterns, e.g., file extensions to look for
     pub fn get_patts(&self) -> &Patterns {
         &self.pats
     }
 
-    /// add extention to search for
-    /// takes either String or &str
-    pub fn add_pat<S:Into<String>>(&mut self, p:S) -> &mut DirNav<App> {
+    /// add extention to search for - takes either String or &str
+    pub fn add_pat<S: Into<String>>(&mut self, p: S) -> &mut DirNav<App> {
         let mut t = std::ffi::OsString::new();
         t.push(p.into());
         self.pats.push(t);
         self
     }
-    /// remove all patterns from store
+    /// reset to default state
     pub fn clear(&mut self) {
         self.pats.clear();
         self.num_dir = 0;
         self.num_fun = 0;
         self.app = App::default();
     }
-    /// Depth First Search for file extentions starting at path dir
-    pub fn visit(&mut self, dir: &Path) 
-             -> io::Result<()> where App:DirEvent {
+    /// Depth First Search for file extentions starting at path dir<br />
+    /// Displays only directories with files matching pattern
+    pub fn visit(&mut self, dir: &Path) -> io::Result<()>
+    where
+        App: DirEvent,
+    {
         self.num_dir += 1;
-        let dir_name:String = self.replace_sep(dir).to_string_lossy().to_string();
+        let dir_name: String = self.replace_sep(dir).to_string_lossy().to_string();
         let mut files = Vec::<std::ffi::OsString>::new();
         let mut sub_dirs = Vec::<std::ffi::OsString>::new();
         if dir.is_dir() {
@@ -95,8 +107,7 @@ impl<App:DirEvent + Default> DirNav<App> {
                 if path.is_dir() {
                     let cd = self.replace_sep(&path);
                     sub_dirs.push(cd);
-                }
-                else {
+                } else {
                     self.num_fun += 1;
                     if self.in_patterns(&entry) {
                         files.push(entry.file_name());
@@ -104,7 +115,7 @@ impl<App:DirEvent + Default> DirNav<App> {
                 }
             }
             /*-- display only dirs with found files --*/
-            if files.len() > 0 {
+            if !files.is_empty() {
                 self.app.do_dir(&dir_name);
             }
             for fl in files {
@@ -119,25 +130,23 @@ impl<App:DirEvent + Default> DirNav<App> {
         }
         Ok(())
     }
-    /// replace Windows directory seperator with Linux seperator
-    pub fn replace_sep(&self, path:&Path) -> std::ffi::OsString {
+    /// replace Windows directory separator with Linux separator
+    pub fn replace_sep(&self, path: &Path) -> std::ffi::OsString {
         let rtn = path.to_string_lossy();
         let mod_path = rtn.replace("\\", "/");
-        let mut os_str:std::ffi::OsString = std::ffi::OsString::new();
-        os_str.push(mod_path.to_string());
+        let mut os_str: std::ffi::OsString = std::ffi::OsString::new();
+        os_str.push(mod_path);
         os_str
     }
     /// does store contain d.path().extension() ?
-    pub fn in_patterns(&self, d:&DirEntry) -> bool {
+    pub fn in_patterns(&self, d: &DirEntry) -> bool {
         let p = d.path();
         let ext = p.extension();
         match ext {
-            Some(extn) => {
-                self.pats.contains(&(extn.to_os_string()))
-            }
-            None => false
+            Some(extn) => self.pats.contains(&(extn.to_os_string())),
+            None => false,
         }
-    }        
+    }
 }
 
 #[cfg(test)]
@@ -152,18 +161,19 @@ mod tests {
         rslt_store: Vec<String>,
     }
     impl DirEvent for ApplTest {
-        fn do_dir(&mut self, _d:&str) {
+        fn do_dir(&mut self, _d: &str) {
             //print!("\n  {:?}", d);
         }
-        fn do_file(&mut self, f:&str) {
+        fn do_file(&mut self, f: &str) {
             //print!("\n    {:?}", f);
             self.rslt_store.push((*f).to_string());
         }
     }
     impl Default for ApplTest {
-        fn default() -> Self { 
-            ApplTest { rslt_store:Vec::<String>::new() } 
-        
+        fn default() -> Self {
+            ApplTest {
+                rslt_store: Vec::<String>::new(),
+            }
         }
     }
     #[test]
@@ -188,10 +198,10 @@ mod tests {
           run exe in target/debug with --nocapture option
           to see output of print statement below.
         */
-        print!("\n  {:?}",rl);
+        print!("\n  {:?}", rl);
 
         // test for found files
-        let l = |s:&str| -> String { s.to_string() };
+        let l = |s: &str| -> String { s.to_string() };
 
         assert!(rl.contains(&l("test_file.rs")));
         assert!(rl.contains(&l("test_file1.rs")));
