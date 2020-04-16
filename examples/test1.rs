@@ -17,33 +17,33 @@ impl DirEvent for Appl {
         print!("\n    {:?}", f);
     }
 }
+impl Default for Appl {
+    fn default() -> Self { Appl }
+}
 
 fn main() -> io::Result<()> {
 
-    let a = Appl;
-    let mut dn = DirNav::<Appl>::new(a);
+    let mut dn = DirNav::<Appl>::new();
 
     let pat1:String = "rs".to_string();
     let _pat2:String = "toml".to_string();
-    let _pat3:String = "JSON".to_string();
+    let _pat3:String = "txt".to_string();
     let pat4:String = "rlib".to_string();
     let _pat5:String = "exe".to_string();
 
     /*-- takes a variety of formats --*/
     dn.add_pat(&pat1);
     dn.add_pat("toml".to_string());
-    dn.add_pat("rmeta");
+    dn.add_pat("txt");
     dn.add_pat(pat4);
     dn.add_pat(&"exe".to_string());
 
     let path = current_dir()?;
-    // path.pop();
-    print!("\n  Searching path {:?}\n", &path);
     let _rslt = dn.visit(&path);
     print!("\n\n  processed {} files and {} dirs", dn.get_funs(), dn.get_dirs());
     print!("\n");
 
-    dn.clear_pat();
+    dn.clear();
     dn.add_pat("rs").add_pat("toml").add_pat("exe");
     print!("\n  Searching path {:?}\n", &path);
     let rslt = dn.visit(&path);

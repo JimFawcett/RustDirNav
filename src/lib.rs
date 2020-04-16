@@ -46,11 +46,11 @@ pub struct DirNav<App:DirEvent> {
     /// number of dirs processed
     num_dir : usize,
 }
-impl<App:DirEvent> DirNav<App> {
-    pub fn new(a:App) -> Self where App:DirEvent {
+impl<App:DirEvent + Default> DirNav<App> {
+    pub fn new() -> Self where App:DirEvent + Default {
         Self {
             pats : Patterns::new(),
-            app:a,
+            app:App::default(),
             num_fun: 0,
             num_dir: 0,
         }
@@ -61,6 +61,10 @@ impl<App:DirEvent> DirNav<App> {
     pub fn get_dirs(&self) -> usize { self.num_dir }
     /// return number of files processed
     pub fn get_funs(&self) -> usize { self.num_fun }
+    /// return patterns
+    pub fn get_patts(&self) -> &Patterns {
+        &self.pats
+    }
 
     /// add extention to search for
     /// takes either String or &str
@@ -71,42 +75,57 @@ impl<App:DirEvent> DirNav<App> {
         self
     }
     /// remove all patterns from store
-    pub fn clear_pat(&mut self) {
+    pub fn clear(&mut self) {
         self.pats.clear();
+        self.num_dir = 0;
+        self.num_fun = 0;
+        self.app = App::default();
     }
     /// Depth First Search for file extentions starting at path dir
     pub fn visit(&mut self, dir: &Path) 
              -> io::Result<()> where App:DirEvent {
         self.num_dir += 1;
-        let mut cd = dir.to_string_lossy().to_string();
-        let mut first = true;
+        let dir_name:String = self.replace_sep(dir).to_string_lossy().to_string();
+        let mut files = Vec::<std::ffi::OsString>::new();
+        let mut sub_dirs = Vec::<std::ffi::OsString>::new();
         if dir.is_dir() {
             for entry in fs::read_dir(dir)? {
                 let entry = entry?;
                 let path = entry.path();
                 if path.is_dir() {
-                    cd = self.replace_sep(&path);
-                    self.visit(&path)?;
-                } else {
+                    let cd = self.replace_sep(&path);
+                    sub_dirs.push(cd);
+                }
+                else {
                     self.num_fun += 1;
                     if self.in_patterns(&entry) {
-                        if first {
-                            print!("\n{:#?}", cd.replace("\\", "/"));
-                            first = false;
-                        }
-                        let name = 
-                          entry.file_name().to_string_lossy().to_string();
-                        self.app.do_file(&name);
+                        files.push(entry.file_name());
                     }
                 }
+            }
+            /*-- display only dirs with found files --*/
+            if files.len() > 0 {
+                self.app.do_dir(&dir_name);
+            }
+            for fl in files {
+                let flnm = fl.to_string_lossy().to_string();
+                self.app.do_file(&flnm);
+            }
+            for sub in sub_dirs {
+                let mut pb = std::path::PathBuf::new();
+                pb.push(sub);
+                self.visit(&pb)?;
             }
         }
         Ok(())
     }
     /// replace Windows directory seperator with Linux seperator
-    pub fn replace_sep(&self, path:&Path) -> String {
+    pub fn replace_sep(&self, path:&Path) -> std::ffi::OsString {
         let rtn = path.to_string_lossy();
-        rtn.replace("\\", "/")
+        let mod_path = rtn.replace("\\", "/");
+        let mut os_str:std::ffi::OsString = std::ffi::OsString::new();
+        os_str.push(mod_path.to_string());
+        os_str
     }
     /// does store contain d.path().extension() ?
     pub fn in_patterns(&self, d:&DirEntry) -> bool {
@@ -128,6 +147,25 @@ mod tests {
     // to see console output:
     //   use cargo test -- --show-output --test-threads=1
     use super::*;
+    #[derive(Debug)]
+    struct ApplTest {
+        rslt_store: Vec<String>,
+    }
+    impl DirEvent for ApplTest {
+        fn do_dir(&mut self, _d:&str) {
+            //print!("\n  {:?}", d);
+        }
+        fn do_file(&mut self, f:&str) {
+            //print!("\n    {:?}", f);
+            self.rslt_store.push((*f).to_string());
+        }
+    }
+    impl Default for ApplTest {
+        fn default() -> Self { 
+            ApplTest { rslt_store:Vec::<String>::new() } 
+        
+        }
+    }
     #[test]
     fn test_setup() {
         let _ = std::fs::create_dir("./test_dir");
@@ -140,23 +178,7 @@ mod tests {
     }
     #[test]
     fn test_walk() {
-        /// ApplTest - generic parameter for testing DirNav<ApplTest>
-        /// rslt_store holds results of file search
-        #[derive(Debug)]
-        struct ApplTest {
-            rslt_store: Vec<String>,
-        }
-        impl DirEvent for ApplTest {
-            fn do_dir(&mut self, _d:&str) {
-                //print!("\n  {:?}", d);
-            }
-            fn do_file(&mut self, f:&str) {
-                //print!("\n    {:?}", f);
-                self.rslt_store.push((*f).to_string());
-            }
-        }
-        let a = ApplTest { rslt_store: Vec::<String>::new(), };
-        let mut dn = DirNav::<ApplTest>::new(a);
+        let mut dn = DirNav::<ApplTest>::new();
         dn.add_pat("rs").add_pat("exe").add_pat("txt");
         let mut pb = PathBuf::new();
         pb.push("./test_dir".to_string());
@@ -179,5 +201,20 @@ mod tests {
           uncomment line below to make test fail
         */
         //assert!(rl.contains(&l("foobar")));
+    }
+    #[test]
+    fn test_patts() {
+        let mut dn = DirNav::<ApplTest>::new();
+        dn.add_pat("foo").add_pat("bar");
+        assert_eq!(dn.get_patts().len(), 2);
+        let pats = dn.get_patts();
+        let mut foo_str = std::ffi::OsString::new();
+        foo_str.push("foo");
+        assert!(pats.contains(&foo_str));
+        let mut bar_str = std::ffi::OsString::new();
+        bar_str.push("bar");
+        assert!(pats.contains(&bar_str));
+        dn.clear();
+        assert_eq!(dn.get_patts().len(), 0);
     }
 }
