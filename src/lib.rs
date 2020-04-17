@@ -10,6 +10,7 @@
 */
 use std::fs::{self, DirEntry};
 use std::io;
+use std::io::{Error, ErrorKind};
 #[allow(unused_imports)]
 use std::path::{Path, PathBuf};
 
@@ -97,7 +98,8 @@ impl<App: DirEvent + Default> DirNav<App> {
         App: DirEvent,
     {
         self.num_dir += 1;
-        let dir_name: String = self.replace_sep(dir).to_string_lossy().to_string();
+        let dir_name: String = 
+          self.replace_sep(dir).to_string_lossy().to_string();
         let mut files = Vec::<std::ffi::OsString>::new();
         let mut sub_dirs = Vec::<std::ffi::OsString>::new();
         if dir.is_dir() {
@@ -109,7 +111,7 @@ impl<App: DirEvent + Default> DirNav<App> {
                     sub_dirs.push(cd);
                 } else {
                     self.num_fun += 1;
-                    if self.in_patterns(&entry) {
+                    if self.in_patterns(&entry) | self.pats.is_empty() {
                         files.push(entry.file_name());
                     }
                 }
@@ -127,8 +129,9 @@ impl<App: DirEvent + Default> DirNav<App> {
                 pb.push(sub);
                 self.visit(&pb)?;
             }
+            return Ok(());  // normal return
         }
-        Ok(())
+        Err(Error::new(ErrorKind::Other, "not a directory"))
     }
     /// replace Windows directory separator with Linux separator
     pub fn replace_sep(&self, path: &Path) -> std::ffi::OsString {

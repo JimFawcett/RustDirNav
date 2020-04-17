@@ -27,23 +27,21 @@ impl Default for Appl {
 fn main() -> io::Result<()> {
     let mut dn = DirNav::<Appl>::new();
 
-    let pat1: String = "rs".to_string();
-    let _pat2: String = "toml".to_string();
-    let _pat3: String = "txt".to_string();
-    let pat4: String = "rlib".to_string();
-    let _pat5: String = "exe".to_string();
-
     /*-- takes a variety of formats --*/
-    dn.add_pat(&pat1);
+
+    let _pat1: String = "rs".to_string();
+    let _pat4: String = "rlib".to_string();
+
+    dn.add_pat(&_pat1);
     dn.add_pat("toml".to_string());
     dn.add_pat("txt");
-    dn.add_pat(pat4);
+    dn.add_pat(_pat4);
     dn.add_pat(&"exe".to_string());
 
     let path = current_dir()?;
     print!("\n  Searching path {:?}\n", &path);
 
-    let _rslt = dn.visit(&path);
+    let _rslt = dn.visit(&path)?;
     
     print!(
         "\n\n  processed {} files and {} dirs",
@@ -57,12 +55,16 @@ fn main() -> io::Result<()> {
     let mut path = std::path::PathBuf::new();
     path.push(".");
     print!("\n  Searching path {:?}\n", &path);
-    let rslt = dn.visit(&path);
+    let _rslt = dn.visit(&path)?;
     print!(
         "\n\n  processed {} files and {} dirs",
         dn.get_funs(),
         dn.get_dirs()
     );
+    // print!("\n");
+    // path.pop();
+    // path.push("foobar");
+    // dn.visit(&path)?;
     print!("\n\n");
-    rslt
+    Ok(())
 }
