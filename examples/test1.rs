@@ -61,10 +61,14 @@ fn main() -> io::Result<()> {
         dn.get_funs(),
         dn.get_dirs()
     );
+    ///////////////////////////////////////////////
+    // uncomment lines below to see error return
+    //---------------------------------------------
     // print!("\n");
     // path.pop();
     // path.push("foobar");
     // dn.visit(&path)?;
+    
     print!("\n\n");
     Ok(())
 }
