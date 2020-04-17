@@ -1,0 +1,22 @@
+  Searching path "C:\\github\\JimFawcett\\RustDirNav"
+
+  C:/github/JimFawcett/RustDirNav
+      Cargo.toml
+  C:/github/JimFawcett/RustDirNav/examples
+      test1.rs
+  C:/github/JimFawcett/RustDirNav/src
+      lib.rs
+  C:/github/JimFawcett/RustDirNav/target/debug/deps
+      librust_dir_nav-1cb9e0028534d47d.rlib
+  C:/github/JimFawcett/RustDirNav/target/debug/examples
+      test1.exe
+  C:/github/JimFawcett/RustDirNav/test_dir
+      test_file.rs
+  C:/github/JimFawcett/RustDirNav/test_dir/test_sub1_dir
+      test_file1.rs
+      test_file2.exe
+  C:/github/JimFawcett/RustDirNav/test_dir/test_sub2_dir
+      test_file3.txt
+
+  processed 353 files and 183 dirs
+
