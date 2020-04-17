@@ -5,16 +5,17 @@
 /////////////////////////////////////////////////////////////
 
 use rust_dir_nav::*;
+#[allow(unused_imports)]
 use std::env::current_dir;
 use std::io;
 
 struct Appl;
 impl DirEvent for Appl {
     fn do_dir(&mut self, d: &str) {
-        print!("\n  {:?}", d);
+        print!("\n  {}", d);
     }
     fn do_file(&mut self, f: &str) {
-        print!("\n    {:?}", f);
+        print!("\n      {}", f);
     }
 }
 impl Default for Appl {
@@ -40,7 +41,10 @@ fn main() -> io::Result<()> {
     dn.add_pat(&"exe".to_string());
 
     let path = current_dir()?;
+    print!("\n  Searching path {:?}\n", &path);
+
     let _rslt = dn.visit(&path);
+    
     print!(
         "\n\n  processed {} files and {} dirs",
         dn.get_funs(),
@@ -49,7 +53,9 @@ fn main() -> io::Result<()> {
     print!("\n");
 
     dn.clear();
-    dn.add_pat("rs").add_pat("toml").add_pat("exe");
+    dn.add_pat("rs").add_pat("toml").add_pat("exe").add_pat("txt");
+    let mut path = std::path::PathBuf::new();
+    path.push(".");
     print!("\n  Searching path {:?}\n", &path);
     let rslt = dn.visit(&path);
     print!(
