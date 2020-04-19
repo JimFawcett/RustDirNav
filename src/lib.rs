@@ -33,6 +33,10 @@ pub trait DirEvent {
 //     }
 // }
 
+/////////////////////////////////////////////////
+// Patterns are a collection of extension strings
+// used to identify files as search targets
+
 type Patterns = Vec<std::ffi::OsString>;
 
 /// Directory Navigator Structure
@@ -103,6 +107,7 @@ impl<App: DirEvent + Default> DirNav<App> {
         let mut files = Vec::<std::ffi::OsString>::new();
         let mut sub_dirs = Vec::<std::ffi::OsString>::new();
         if dir.is_dir() {
+            /* search local directory */
             for entry in fs::read_dir(dir)? {
                 let entry = entry?;
                 let path = entry.path();
@@ -124,6 +129,7 @@ impl<App: DirEvent + Default> DirNav<App> {
                 let flnm = fl.to_string_lossy().to_string();
                 self.app.do_file(&flnm);
             }
+            /*-- recurse into subdirectories --*/
             for sub in sub_dirs {
                 let mut pb = std::path::PathBuf::new();
                 pb.push(sub);

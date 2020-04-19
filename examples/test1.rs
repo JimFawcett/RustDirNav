@@ -25,6 +25,7 @@ impl Default for Appl {
 }
 
 fn main() -> io::Result<()> {
+
     let mut dn = DirNav::<Appl>::new();
 
     /*-- takes a variety of formats --*/
