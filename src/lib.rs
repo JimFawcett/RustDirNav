@@ -37,14 +37,14 @@ pub trait DirEvent {
 // Patterns are a collection of extension strings
 // used to identify files as search targets
 
-type Patterns = Vec<std::ffi::OsString>;
+type SearchPatterns = Vec<std::ffi::OsString>;
 
 /// Directory Navigator Structure
 #[allow(dead_code)]
 #[derive(Debug, Default)]
 pub struct DirNav<App: DirEvent> {
     /// file extensions to look for
-    pats: Patterns,
+    pats: SearchPatterns,
     /// instance of App : DirEvent, requires do_file and do_dir methods
     app: App,
     /// number of files processed
@@ -58,7 +58,7 @@ impl<App: DirEvent + Default> DirNav<App> {
         App: DirEvent + Default,
     {
         Self {
-            pats: Patterns::new(),
+            pats: SearchPatterns::new(),
             app: App::default(),
             num_fun: 0,
             num_dir: 0,
@@ -77,7 +77,7 @@ impl<App: DirEvent + Default> DirNav<App> {
         self.num_fun
     }
     /// return patterns, e.g., file extensions to look for
-    pub fn get_patts(&self) -> &Patterns {
+    pub fn get_patts(&self) -> &SearchPatterns {
         &self.pats
     }
 
