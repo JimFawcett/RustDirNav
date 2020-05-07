@@ -23,12 +23,12 @@ pub trait DirEvent {
 // Sample implementation of DirNav param
 // --------------------------------------
 // #[derive(Debug, Default)]
-// struct Appl;
+// pub struct Appl;
 // impl DirEvent for Appl {
-//     fn do_dir(&mut self, d:&String) {
+//     fn do_dir(&mut self, d:&str) {
 //         print!("\n  {:?}", d);
 //     }
-//     fn do_file(&mut self, f:&String) {
+//     fn do_file(&mut self, f:&str) {
 //         print!("\n    {:?}", f);
 //     }
 // }
@@ -65,8 +65,8 @@ impl<App: DirEvent + Default> DirNav<App> {
         }
     }
     /// return reference to App to get results, if any
-    pub fn get_app(&mut self) -> &App {
-        &self.app
+    pub fn get_app(&mut self) -> &mut App {
+        &mut self.app
     }
     /// return number of dirs processed
     pub fn get_dirs(&self) -> usize {
