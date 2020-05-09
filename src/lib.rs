@@ -139,7 +139,7 @@ impl<App: DirEvent + Default> DirNav<App> {
                 }
             }
             /*-- display only dirs with found files --*/
-            if !files.is_empty() || self.hide == false {
+            if !files.is_empty() || !self.hide {
                 self.app.do_dir(&dir_name);
             }
             for fl in files {

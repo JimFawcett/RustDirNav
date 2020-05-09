@@ -1,6 +1,6 @@
 [package]
 name = "rust_dir_nav"
-version = "1.0.0"
+version = "1.1.0"
 authors = ["James W. Fawcett <jfawcett@twcny.rr.com>"]
 edition = "2018"
 
