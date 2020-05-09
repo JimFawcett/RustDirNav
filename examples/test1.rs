@@ -39,6 +39,8 @@ fn main() -> io::Result<()> {
     dn.add_pat(_pat4);
     dn.add_pat(&"exe".to_string());
 
+    //dn.hide(false);
+
     let path = current_dir()?;
     print!("\n  Searching path {:?}\n", &path);
 
@@ -46,7 +48,7 @@ fn main() -> io::Result<()> {
     
     print!(
         "\n\n  processed {} files and {} dirs",
-        dn.get_funs(),
+        dn.get_files(),
         dn.get_dirs()
     );
     print!("\n");
@@ -54,12 +56,12 @@ fn main() -> io::Result<()> {
     dn.clear();
     dn.add_pat("rs").add_pat("toml").add_pat("exe").add_pat("txt");
     let mut path = std::path::PathBuf::new();
-    path.push(".");
+    path.push("./test_dir");
     print!("\n  Searching path {:?}\n", &path);
     let _rslt = dn.visit(&path)?;
     print!(
-        "\n\n  processed {} files and {} dirs",
-        dn.get_funs(),
+        "\n\n  processed {} files in {} dirs",
+        dn.get_files(),
         dn.get_dirs()
     );
     ///////////////////////////////////////////////

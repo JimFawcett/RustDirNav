@@ -7,6 +7,10 @@
    DirNav<App> is a directory navigator that  uses the generic
    parameter App to define how files and directories are
    handled.
+   - displays only paths that have file targets by default
+   - hide(false) will show all directories traversed
+   - recurses directory tree at specified root by default
+   - recurse(false) examines only specified path.
 */
 use std::fs::{self, DirEntry};
 use std::io;
@@ -48,9 +52,13 @@ pub struct DirNav<App: DirEvent> {
     /// instance of App : DirEvent, requires do_file and do_dir methods
     app: App,
     /// number of files processed
-    num_fun: usize,
+    num_file: usize,
     /// number of dirs processed
     num_dir: usize,
+    /// recurse ?
+    recurse : bool,
+    /// hide dirs with no targets ?
+    hide: bool,
 }
 impl<App: DirEvent + Default> DirNav<App> {
     pub fn new() -> Self
@@ -60,9 +68,19 @@ impl<App: DirEvent + Default> DirNav<App> {
         Self {
             pats: SearchPatterns::new(),
             app: App::default(),
-            num_fun: 0,
+            num_file: 0,
             num_dir: 0,
+            recurse: true,
+            hide: true,
         }
+    }
+    /// do recursive visit?
+    pub fn recurse(&mut self, p:bool) {
+        self.recurse = p;
+    }
+    /// hide dirs with no targets?
+    pub fn hide(&mut self, p:bool) {
+        self.hide = p;
     }
     /// return reference to App to get results, if any
     pub fn get_app(&mut self) -> &mut App {
@@ -73,8 +91,8 @@ impl<App: DirEvent + Default> DirNav<App> {
         self.num_dir
     }
     /// return number of files processed
-    pub fn get_funs(&self) -> usize {
-        self.num_fun
+    pub fn get_files(&self) -> usize {
+        self.num_file
     }
     /// return patterns, e.g., file extensions to look for
     pub fn get_patts(&self) -> &SearchPatterns {
@@ -92,14 +110,13 @@ impl<App: DirEvent + Default> DirNav<App> {
     pub fn clear(&mut self) {
         self.pats.clear();
         self.num_dir = 0;
-        self.num_fun = 0;
+        self.num_file = 0;
         self.app = App::default();
     }
     /// Depth First Search for file extentions starting at path dir<br />
     /// Displays only directories with files matching pattern
     pub fn visit(&mut self, dir: &Path) -> io::Result<()>
-    where
-        App: DirEvent,
+    where App: DirEvent
     {
         self.num_dir += 1;
         let dir_name: String = 
@@ -115,14 +132,14 @@ impl<App: DirEvent + Default> DirNav<App> {
                     let cd = self.replace_sep(&path);
                     sub_dirs.push(cd);
                 } else {
-                    self.num_fun += 1;
+                    self.num_file += 1;
                     if self.in_patterns(&entry) | self.pats.is_empty() {
                         files.push(entry.file_name());
                     }
                 }
             }
             /*-- display only dirs with found files --*/
-            if !files.is_empty() {
+            if !files.is_empty() || self.hide == false {
                 self.app.do_dir(&dir_name);
             }
             for fl in files {
@@ -133,7 +150,9 @@ impl<App: DirEvent + Default> DirNav<App> {
             for sub in sub_dirs {
                 let mut pb = std::path::PathBuf::new();
                 pb.push(sub);
-                self.visit(&pb)?;
+                if self.recurse {
+                    self.visit(&pb)?;
+                }
             }
             return Ok(());  // normal return
         }
