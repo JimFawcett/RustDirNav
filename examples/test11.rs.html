@@ -1,0 +1,78 @@
+<pre>/////////////////////////////////////////////////////////////
+// rust_dir_nav::test1.rs                                  //
+//                                                         //
+// Jim Fawcett, https://JimFawcett.github.io, 12 Apr 2020  //
+/////////////////////////////////////////////////////////////
+
+use rust_dir_nav::*;
+#[allow(unused_imports)]
+use std::env::current_dir;
+use std::io;
+
+struct Appl;
+impl DirEvent for Appl {
+    fn do_dir(&amp;mut self, d: &amp;str) {
+        print!("\n  {}", d);
+    }
+    fn do_file(&amp;mut self, f: &amp;str) {
+        print!("\n      {}", f);
+    }
+}
+impl Default for Appl {
+    fn default() -&gt; Self {
+        Appl
+    }
+}
+
+fn main() -&gt; io::Result&lt;()&gt; {
+
+    let mut dn = DirNav::&lt;Appl&gt;::new();
+
+    /*-- takes a variety of formats --*/
+
+    let _pat1: String = "rs".to_string();
+    let _pat4: String = "rlib".to_string();
+
+    dn.add_pat(&amp;_pat1);
+    dn.add_pat("toml".to_string());
+    dn.add_pat("txt");
+    dn.add_pat(_pat4);
+    dn.add_pat(&amp;"exe".to_string());
+
+    //dn.hide(false);
+
+    let path = current_dir()?;
+    print!("\n  Searching path {:?}\n", &amp;path);
+
+    let _rslt = dn.visit(&amp;path)?;
+    
+    print!(
+        "\n\n  processed {} files and {} dirs",
+        dn.get_files(),
+        dn.get_dirs()
+    );
+    print!("\n");
+
+    dn.clear();
+    dn.add_pat("rs").add_pat("toml").add_pat("exe").add_pat("txt");
+    let mut path = std::path::PathBuf::new();
+    path.push("./test_dir");
+    print!("\n  Searching path {:?}\n", &amp;path);
+    let _rslt = dn.visit(&amp;path)?;
+    print!(
+        "\n\n  processed {} files in {} dirs",
+        dn.get_files(),
+        dn.get_dirs()
+    );
+    ///////////////////////////////////////////////
+    // uncomment lines below to see error return
+    //---------------------------------------------
+    // print!("\n");
+    // path.pop();
+    // path.push("foobar");
+    // dn.visit(&amp;path)?;
+    
+    print!("\n\n");
+    Ok(())
+}
+</pre>
