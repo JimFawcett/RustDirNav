@@ -13,7 +13,7 @@ Quick Status version 1.1.0 Code functions correctly No known defects Demonstrati
 RustDirNav is a facility for Depth-First-Search (DFS) of specified directory tree. It uses a generic parameter to provide application specific do\_dir and do\_file operations.
 ![](Pictures/RustDirNav.jpg)
 <!-- ![](Pictures/RustDirNavOutput.JPG) -->
-<img src="Pictures/RustDirNavOutput.JPG" width="400">
+<img src="Pictures/RustDirNavOutput.JPG" width="500">
 
 ### Design:
 
