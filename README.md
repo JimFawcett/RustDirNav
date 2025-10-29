@@ -20,43 +20,32 @@ RustDirNav is a facility for Depth-First-Search (DFS) of specified directory tre
 There is one struct, DirNav<App>, with methods and functions implementing this design: Methods:
 
 1.  **new() -> Self**
-    
     Create new DirNav which has visit method for recursive DFS.
-    
 2.  **add\_pat(&mut self, s&str) -> Self**
-    
     Add pattern to match file extension. Can be chained.
     
 3.  **visit(&mut self, p:&Path)**
-    
     Walks directory tree rooted at path p, looking for files matching pattern(s).
     
 4.  **recurse(&mut self, p:bool)**
-    
     Sets or resets option to recurse directory tree.
     
 5.  **hide(&mut self, p:bool)**
-    
     Sets or resets option to hide directories with no target contents.
     
 6.  **get\_app(&mut self) -> &mut app**
-    
     Retrieves reference to embedded application, set with generic parameter.
     
 7.  **get\_dirs(&self) -> usize**
-    
     Retrieves the number of directories entered
     
 8.  **get\_files(&self) -> usize**
-    
     Retrieves the number of files processed.
     
 9.  **get\_patts(&self) -> &SearchPatterns**
-    
     Retrieves vector of patterns.
     
 10.  **clear(&self)**
-    
     Returns DirNav<app> to its initial state.
     
 
