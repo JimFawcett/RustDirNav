@@ -55,8 +55,7 @@ There is one struct, DirNav<App>, with methods and functions implementing this d
 
     Retrieves vector of patterns.
     
-10.  **clear(&self)**
-
+10.  **clear(&self)**<br>
     Returns DirNav<app> to its initial state.
     
 
